@@ -9,12 +9,9 @@ from tensorflow.keras.applications.vgg16 import preprocess_input
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import EarlyStopping
 
-early_stopping = EarlyStopping(monitor='val_categorical_accuracy', patience=5, min_delta=1e-1, verbose=1,
-                               restore_best_weights=True)
 
 SHAPE = (224, 224)
 NUM_CLASSES = 9
-FT_UP_LAYERS = 4
 BATCH_SIZE = 32
 EPOCHS = 10
 DF_FRAC = 0.1
@@ -87,7 +84,7 @@ if __name__ == '__main__':
     tuner = Hyperband(
         build_model,
         objective='val_categorical_accuracy',
-        max_epochs=100,
+        max_epochs=EPOCHS,
         executions_per_trial=3,
         directory='trials',
         project_name='FER'
@@ -96,9 +93,10 @@ if __name__ == '__main__':
     tuner.search(
         train_generator,
         validation_data=validation_generator,
-        epochs=100,
-        batch_size=128,
-        callbacks=[early_stopping],
+        epochs=EPOCHS,
+        batch_size=BATCH_SIZE,
+        callbacks=[EarlyStopping(monitor='val_categorical_accuracy', patience=5, min_delta=1e-1, verbose=1,
+                               restore_best_weights=True)],
         verbose=0
     )
 
